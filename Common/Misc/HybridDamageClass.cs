@@ -1,4 +1,4 @@
-﻿using StructureHelper.Content.GUI;
+﻿using SpiritReforged.Common.ModCompat;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -24,15 +24,19 @@ public class HybridDamageClass : DamageClass
 			if (index != -1 && hybridDamageClass._subClasses.Count > 0)
 			{
 				DamageSlice first = slices[0];
+
 				tooltips[index].Text = $"{Math.Round(totalDamage * (float)(first.Weight / totalWeight))}{first.Class.DisplayName}";
+				tooltips[index].OverrideColor = DamageClassHelper.GetDamageClassColor(first.Class);
 
 				for (int i = 1; i < slices.Length; i++)
 				{
 					DamageSlice subClass = slices[i];
 
-					tooltips.Insert(index + i, new TooltipLine(Mod, $"SpiritReforged: HybridDamageClass Line: #{i}", $"{Math.Round(totalDamage * (float)(subClass.Weight / totalWeight))}{subClass.Class.DisplayName}"));
+					TooltipLine line = new(Mod, $"SpiritReforged: HybridDamageClass Line: #{i}", $"{Math.Round(totalDamage * (float)(subClass.Weight / totalWeight))}{subClass.Class.DisplayName}");
+					line.OverrideColor = DamageClassHelper.GetDamageClassColor(subClass.Class);
+					tooltips.Insert(index + i, line);
 				}
-			}	
+			}
 		}
 	}
 

@@ -7,11 +7,13 @@ using SpiritReforged.Content.Ocean.Items.Reefhunter.CascadeArmor;
 using SpiritReforged.Content.Savanna.Items.DrywoodSet;
 using SpiritReforged.Content.Underground.WayfarerSet;
 using SpiritReforged.Content.Vanilla.Leather.MarksmanArmor;
+using System.Reflection;
 
 namespace SpiritReforged.Common.ModCompat;
 
 internal class RussianTranslateCompat : ModSystem
 {
+	public static bool ColoredDamageTypes { get; private set; }
 	public override void PostSetupContent()
 	{
 		var spiritR = Mod;
@@ -20,6 +22,12 @@ internal class RussianTranslateCompat : ModSystem
 			return;
 
 		var tru = CrossMod.RussianTranslate.Instance;
+
+		Type configType = tru.Code.GetType("CalamityRuTranslate.Core.Config.TRuConfig");
+		object configInstance = configType?.GetField("Instance", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+
+		if (configType?.GetField("ColoredDamageTypes", BindingFlags.Public | BindingFlags.Instance)?.GetValue(configInstance) is bool value)
+			ColoredDamageTypes = value;
 
 		tru.Call("AddFeminineItems", spiritR, new[]
 		{
@@ -88,5 +96,30 @@ internal class RussianTranslateCompat : ModSystem
 
 		tru.Call("AddArmorSetBonusPreview", ModContent.ItemType<CascadeHelmet>(), () =>
 				Language.GetTextValue("Mods.SpiritReforged.SetBonuses.Cascade"));
+	}
+}
+
+public static class DamageClassHelper
+{
+	public static Color GetDamageClassColor(DamageClass damageClass)
+	{
+		if (CrossMod.RussianLocalizable && RussianTranslateCompat.ColoredDamageTypes == true)
+		{
+			if (damageClass == DamageClass.Melee || damageClass == DamageClass.MeleeNoSpeed)
+				return new Color(255, 85, 85);
+
+			if (damageClass == DamageClass.Ranged)
+				return new Color(80, 250, 123);
+
+			if (damageClass == DamageClass.Magic)
+				return new Color(189, 147, 249);
+
+			if (damageClass == DamageClass.Summon)
+				return new Color(241, 250, 140);
+
+			return Color.White;
+		}
+
+		return Color.White;
 	}
 }
